@@ -1,0 +1,82 @@
+-- USERS TABLE
+CREATE TABLE USERS (
+    user_id NUMBER PRIMARY KEY,
+    name VARCHAR2(100) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    password_hash VARCHAR2(255) NOT NULL,
+    user_role VARCHAR2(10) CHECK (user_role IN ('donor','ngo','admin')),
+    created_at DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 1;
+
+-- DONORS TABLE
+CREATE TABLE DONORS (
+    donor_id NUMBER PRIMARY KEY,
+    user_id NUMBER REFERENCES USERS(user_id),
+    city VARCHAR2(100),
+    cause_preference VARCHAR2(50),
+    urgency_preference VARCHAR2(10)
+);
+
+CREATE SEQUENCE donors_seq START WITH 1 INCREMENT BY 1;
+
+-- NGOS TABLE
+CREATE TABLE NGOS (
+    ngo_id NUMBER PRIMARY KEY,
+    user_id NUMBER REFERENCES USERS(user_id),
+    name VARCHAR2(150),
+    cause VARCHAR2(50),
+    city VARCHAR2(100),
+    description VARCHAR2(500),
+    status VARCHAR2(15) DEFAULT 'pending',
+    urgency_score NUMBER DEFAULT 0
+);
+
+CREATE SEQUENCE ngos_seq START WITH 1 INCREMENT BY 1;
+
+-- VERIFICATION REQUESTS TABLE
+CREATE TABLE VERIFICATION_REQUESTS (
+    req_id NUMBER PRIMARY KEY,
+    ngo_id NUMBER REFERENCES NGOS(ngo_id),
+    status VARCHAR2(10) DEFAULT 'pending',
+    admin_note VARCHAR2(300),
+    submitted_at DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE verif_seq START WITH 1 INCREMENT BY 1;
+
+-- MATCHES TABLE
+CREATE TABLE MATCHES (
+    match_id NUMBER PRIMARY KEY,
+    donor_id NUMBER REFERENCES DONORS(donor_id),
+    ngo_id NUMBER REFERENCES NGOS(ngo_id),
+    score NUMBER,
+    matched_at DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE matches_seq START WITH 1 INCREMENT BY 1;
+
+-- DONATIONS TABLE
+CREATE TABLE DONATIONS (
+    donation_id NUMBER PRIMARY KEY,
+    donor_id NUMBER REFERENCES DONORS(donor_id),
+    ngo_id NUMBER REFERENCES NGOS(ngo_id),
+    amount NUMBER,
+    donated_at DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE donations_seq START WITH 1 INCREMENT BY 1;
+
+-- NOTIFICATIONS TABLE
+CREATE TABLE NOTIFICATIONS (
+    notif_id NUMBER PRIMARY KEY,
+    user_id NUMBER REFERENCES USERS(user_id),
+    message VARCHAR2(300),
+    is_read NUMBER(1) DEFAULT 0,
+    created_at DATE DEFAULT SYSDATE
+);
+
+CREATE SEQUENCE notif_seq START WITH 1 INCREMENT BY 1;
+SELECT table_name FROM user_tables ORDER BY table_name;
+
